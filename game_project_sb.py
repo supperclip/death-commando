@@ -987,6 +987,8 @@ while True:
         #display
         coin_display = str(coin)
 
+        #test
+
     if (mainMenu):
         screen.blit(background,(0,0))
         screen.blit(gameLogo,(0,15))
