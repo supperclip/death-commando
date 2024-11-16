@@ -16,7 +16,7 @@ playing = False
 mainMenu = True
 guideMenu = False
 
-waveStop = False
+waveStop = True
 
 #plane color surfaces
 white_line = pygame.Surface((60,7.5))
@@ -67,6 +67,21 @@ burster_2= pygame.image.load("x/burster_2.png")
 burster_2 = pygame.transform.rotate(burster_2, 90)
 burster_2 = pygame.transform.scale(burster_2, (70, 70))
 
+menuEnemy_1 = pygame.transform.rotate(enemy_1, 270)
+menuEnemy_2 = pygame.transform.rotate(enemy_2, 270)
+
+menuEnemySprites = [menuEnemy_1,menuEnemy_2]
+
+menuBrute_1 = pygame.transform.rotate(brute_1, 270)
+menuBrute_2 = pygame.transform.rotate(brute_2, 270)
+
+menuBruteSprites = [menuBrute_1,menuBrute_2]
+
+menuRager_1 = pygame.transform.rotate(rager_1, 270)
+menuRager_2 = pygame.transform.rotate(rager_2, 270)
+
+menuRagerSprites = [menuRager_1,menuRager_2]
+
 player_frame_1 = pygame.image.load("x/player_1.png").convert_alpha()
 player_frame_1 = pygame.transform.rotate(player_frame_1, 90)
 player_rect = player_frame_1.get_rect()
@@ -115,7 +130,6 @@ playerFLEX_shoot_2 = pygame.transform.rotate(playerFLEX_shoot_2, 90)
 
 playerFLEX_shoot_3 = pygame.image.load("x/player_FLEX_shoot3.png").convert_alpha()
 playerFLEX_shoot_3 = pygame.transform.rotate(playerFLEX_shoot_3, 90)
-
 
 terror_logo = pygame.image.load("x/terror_crops_logo.png")
 terror_logo = pygame.transform.scale(terror_logo, (40, 40))
@@ -257,6 +271,8 @@ resupFlareFrame = 0
 resupFlareFrame2 = 0
 medPackAnimationFrame = 0
 lastFrameNotFired = 0
+MenuFrame = 0
+menuFrame_offset = 0
 
 eliteEnemyTime = 180
 enemySpawnTime = 10
@@ -285,7 +301,7 @@ ammoRestock = False
 player_rect.x = 400
 player_rect.y = 250
 MoveSpeed = 1.2
-dashCooldown = 45
+dashCooldown = 90
 
 playerHealth = 50
 
@@ -312,9 +328,14 @@ enemy_Xlist = []
 enemy_Ylist = []
 enemyHealthList = []
 
+menuEnemy_Xlist = []
+menuEnemy_Ylist = []
+
 CanSpawnEnemy = True
 Enemy_Clipped_line = False
 enemyHitPlayer = False
+
+currentEnemyWave = 1
 
 #brute data
 bruteSpeed = 0.5
@@ -335,6 +356,8 @@ bruteChargeSpeedList = []
 bruteChargeTiming = []
 bruteChargeRot = []
 bruteChargingList = []
+menuBrute_Xlist = []
+menuBrute_Ylist = []
 
 
 bruteClippedLine = False
@@ -352,6 +375,8 @@ ragerAnimationList = [rager_1,rager_2]
 ragerHealthList = []
 ragerXList = []
 ragerYList = []
+menuRager_Xlist = []
+menuRager_Ylist = []
 
 ragerClippedLine = False
 
@@ -470,27 +495,30 @@ def Delay(inputFrame,frame,delay):
     else:
         return False
 
+
 while True:
 
     if (playing):
         
         if (current_frame == 1):
             pygame.mixer.Sound.play(music,-1)
+            waveStop = True
         #enemy spawn scalling
-        if (current_frame == (60 * 60) * 0.25):
+        if (current_frame == (60 * 60) * 0.05):
             pygame.mixer.Sound.play(hordeAlertList[random.randint(1,4)])
-            eliteEnemyTime -= 10
-            enemySpawnTime -= 1
-            maxEnemies += 25
+            eliteEnemyTime = 260
+            enemySpawnTime = 20
+            maxEnemies = 40
+            waveStop = False
         if (current_frame == (60 * 60) * 0.5):
             waveStop = True
             pygame.mixer.Sound.play(breakAlert)
-        if (current_frame == (60*60) * 0.75):
+        if (current_frame == (60*60) * 0.8):
             waveStop = False
             pygame.mixer.Sound.play(hordeAlertList[random.randint(1,4)])
-            eliteEnemyTime -= 10
-            enemySpawnTime -= 1
-            maxEnemies += 25
+            eliteEnemyTime = 240
+            enemySpawnTime = 15
+            maxEnemies = 65
         
         if (WeaponSwapFrame == True):
             WeaponList = CheckWeapon(currentGun)
@@ -547,8 +575,6 @@ while True:
         
         if keys[pygame.K_r]:
             R_pressed = True
-        if not keys[pygame.K_r]:
-            R_pressed = False
         if keys[pygame.K_e]:
             E_pressed = True
         if not keys[pygame.K_e]:
@@ -628,7 +654,6 @@ while True:
                         Total_Ammo -= magSize - ammo
                         ammo = magSize
                         Is_reloading = False
-                
                 R_pressed = False
             else:
                 Frame_checker += 1
@@ -1020,6 +1045,92 @@ while True:
             del bruteChargeTiming[index]
             del bruteChargeRot[index]
         
+        if (playerHealth <= 0):
+            R_pressed = False
+            M_pressed = False
+            Space_pressed = False
+            E_pressed = False
+            N_pressed = False
+            P_pressed = False
+            T_pressed = False
+            pressed_1 = False
+            pressed_3 = False
+            ESC_pressed = False
+            current_frame = 0
+            frame_offset = 0
+            Frame_checker = 0
+            player_frame_offest = 0
+            WeaponSwapFrame = False
+            ammoFrame = 0
+            ammoFrame2 = 0
+            resupFlareFrame = 0
+            resupFlareFrame2 = 0
+            medPackAnimationFrame = 0
+            lastFrameNotFired = 0
+            eliteEnemyTime = 180
+            enemySpawnTime = 10
+            maxEnemies = 100
+            coin = 1
+            restockPrice = 75
+            resupCallFrame = 0
+            resupCalledIn = False
+            medPackCallFrame = 0
+            medPackCalledIn = False
+            medPackPrice = 10
+            medPackRestock = False
+            shopTest = False
+            resupBlit = False
+            ammoShopBuy = False
+            ammoRestock = False
+            player_rect.x = 400
+            player_rect.y = 250
+            MoveSpeed = 1.2
+            dashCooldown = 45
+            playerHealth = 50
+            current_player_frame = player_frame_1
+            enemy_speed = 1.4
+            enemyHealth = 5
+            enemyDamage = 3
+            enemyHitCooldown = 0
+            enemyCooldown = 90
+            enemyHitTimer = False
+            enemy_Xlist = []
+            enemy_Ylist = []
+            enemyHealthList = []
+            CanSpawnEnemy = True
+            Enemy_Clipped_line = False
+            enemyHitPlayer = False
+            bruteHitCooldown = 0
+            bruteHitPlayer = False
+            bruteHitTimer = False
+            bruteHealthList = []
+            bruteXList = []
+            bruteYList = []
+            bruteChargeSpeedList = []
+            bruteChargeTiming = []
+            bruteChargeRot = []
+            bruteChargingList = []
+            bruteClippedLine = False
+            ragerHitCooldown = 0
+            ragerHitPlayer = False
+            ragerHealthList = []
+            ragerXList = []
+            ragerYList = []
+            ragerClippedLine = False
+            bursterHealthList = []
+            bursterXList = []
+            bursterYList = []
+            bursterClippedLine = False
+            Gun_already_fired = False
+            Is_reloading = False
+            WeaponSwapFrame = True
+            currentGun = "flex"
+            reloadList = [gun_Open, gun_Reload, gun_Close]
+            gun_firing_frame = False
+            CanShoot = False
+            OutOfAmmo = False
+            currentEnemyWave = 1
+        
         #reset bools
         Gun_already_fired = False
         OutOfAmmo = False
@@ -1031,8 +1142,6 @@ while True:
 
     if (mainMenu):
         screen.blit(background,(0,0))
-        screen.blit(gameLogo,(0,15))
-
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
@@ -1044,8 +1153,49 @@ while True:
             Rmouse = mouse_buttons[1]
      
         mousePos = pygame.mouse.get_pos()
-        pygame.draw.rect(screen, (255, 0, 0), playButtonRect, 2)
-        pygame.draw.rect(screen, (255, 0, 0), guideButtonRect, 2)
+        
+        if MenuFrame % 45 == 0:
+            if len(menuEnemy_Xlist) <= 25:
+                menuEnemy_x = random.randint(0, 1000)
+                menuEnemy_Xlist.append(menuEnemy_x)
+                menuEnemy_Ylist.append(-25)
+        for x in range(len(menuEnemy_Xlist)):
+            menuEnemy_Ylist[x] += 1
+            if MenuFrame % 10 == 0:
+                menuFrame_offset = random.randint(0, 1)
+            if (menuEnemy_Ylist[x] >= 700):
+                menuEnemy_Ylist[x] = 0
+            screen.blit(menuEnemySprites[menuFrame_offset],(menuEnemy_Xlist[x],menuEnemy_Ylist[x]))
+
+        if MenuFrame % 280 == 0:
+            if len(menuBrute_Xlist) <= 25:
+                menuBrute_x = random.randint(0, 1000)
+                menuBrute_Xlist.append(menuBrute_x)
+                menuBrute_Ylist.append(-25)
+        for x in range(len(menuBrute_Xlist)):
+            menuBrute_Ylist[x] += 0.5
+            if MenuFrame % 10 == 0:
+                menuFrame_offset = random.randint(0, 1)
+            if (menuBrute_Ylist[x] >= 700):
+                menuBrute_Ylist[x] = 0
+                menuBrute_Xlist[x] = random.randint(0, 1000)
+            screen.blit(menuBruteSprites[menuFrame_offset],(menuBrute_Xlist[x],menuBrute_Ylist[x]))
+
+        if (MenuFrame + 120) % 280 == 0:
+            if len(menuRager_Xlist) <= 25:
+                menuRager_x = random.randint(0, 1000)
+                menuRager_Xlist.append(menuRager_x)
+                menuRager_Ylist.append(-25)
+        for x in range(len(menuRager_Xlist)):
+            menuRager_Ylist[x] += 2
+            if MenuFrame % 10 == 0:
+                menuFrame_offset = random.randint(0, 1)
+            if (menuRager_Ylist[x] >= 700):
+                menuRager_Ylist[x] = 0
+                menuRager_Xlist[x] = random.randint(0, 1000)
+            screen.blit(menuRagerSprites[menuFrame_offset],(menuRager_Xlist[x],menuRager_Ylist[x]))
+
+        MenuFrame += 1
 
         if Lmouse and playButtonRect.collidepoint(mousePos):
             mainMenu = False
@@ -1056,6 +1206,8 @@ while True:
             mainMenu = False
             Playing = False
             guideMenu = True
+
+        screen.blit(gameLogo,(0,15))
 
     if (guideMenu):
         screen.blit(background,(0,0))

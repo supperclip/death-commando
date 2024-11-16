@@ -31,7 +31,7 @@ class player:
                 dash = True
                 dashCall = tick
                 if (dash):
-                    dashSpeed = 10 - (0.5* (now - self.last_tick))
+                    dashSpeed = 15 - (0.5* (now - self.last_tick))
                 if (dashCall == (now + 30)):
                     dash = False
         
