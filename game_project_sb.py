@@ -467,13 +467,13 @@ def MoveEnemyY(rotX,rotY,currentY,speed):
 
 def CheckWeapon(Weapon):
     if (Weapon == "MK1ravager"):
-        return [5,100,35,6,MK1ravagerList,MK1ReloadList,rifleShot,50,1] #damage, total ammo, mag size, fire rate, player sprites list, reload times, shoot sound, resup cost, audio handling
+        return [5,150,25,6,MK1ravagerList,MK1ReloadList,rifleShot,50,1] #damage, total ammo, mag size, fire rate, player sprites list, reload times, shoot sound, resup cost, audio handling
     elif (Weapon == "MK2ravager"):
         return [5,300,50,3,MK2ravagerList,MK2ReloadList,rifleShot,200,2] #damage, total ammo, mag size, fire rate, player sprites list, reload times, shoot sound, resup cost, audio handling
     elif (Weapon == "SMG"):
         return [1.5,0,425,1,SMGList,SMGReloadList,smgShoot,150,1] #damage, total ammo, mag size, fire rate, player sprites list, reload times, shoot sound, resup cost, audio handling
     elif (Weapon == "flex"):
-        return [10,150,25,15,FLEXList,FLEXReloadList,FLEXShoot,75,1] #damage, total ammo, mag size, fire rate, player sprites list, reload times, shoot sound, resup cost, audio handling
+        return [5,150,25,15,FLEXList,FLEXReloadList,FLEXShoot,75,1] #damage, total ammo, mag size, fire rate, player sprites list, reload times, shoot sound, resup cost, audio handling
     
 def enemyCol(enemy):
     if pygame.Rect.colliderect(enemy,playerRoatedRect):
@@ -500,7 +500,7 @@ while True:
 
     if (playing):
         
-        if (current_frame == 1):
+        if (current_frame == 0):
             pygame.mixer.Sound.play(music,-1)
             waveStop = True
         #enemy spawn scalling
@@ -1000,7 +1000,7 @@ while True:
             distFromPlayer = (distFromPlayer / 25)
             if (distFromPlayer <= 5):
                 bruteChargeTiming[x] += 1
-                bruteChargeSpeedList[x] = (1.2 * (bruteChargeTiming[x] / 25))
+                bruteChargeSpeedList[x] = (1.11 * (bruteChargeTiming[x] / 25))
                 bruteChargingList[x] == True
             else:
                 bruteChargeSpeedList[x] = 1
@@ -1056,7 +1056,7 @@ while True:
             pressed_1 = False
             pressed_3 = False
             ESC_pressed = False
-            current_frame = 0
+            current_frame = 1
             frame_offset = 0
             Frame_checker = 0
             player_frame_offest = 0
