@@ -104,6 +104,19 @@ playerSMG_shoot_2 = pygame.transform.rotate(playerSMG_shoot_2, 90)
 playerSMG_shoot_3 = pygame.image.load("x/player_SMGshoot_3.png").convert_alpha()
 playerSMG_shoot_3 = pygame.transform.rotate(playerSMG_shoot_3, 90)
 
+playerFLEX_1 = pygame.image.load("x/player_FLEX_1.png").convert_alpha()
+playerFLEX_1 = pygame.transform.rotate(playerFLEX_1, 90)
+
+playerFLEX_shoot_1 = pygame.image.load("x/player_FLEX_shoot1.png").convert_alpha()
+playerFLEX_shoot_1 = pygame.transform.rotate(playerFLEX_shoot_1, 90)
+
+playerFLEX_shoot_2 = pygame.image.load("x/player_FLEX_shoot2.png").convert_alpha()
+playerFLEX_shoot_2 = pygame.transform.rotate(playerFLEX_shoot_2, 90)
+
+playerFLEX_shoot_3 = pygame.image.load("x/player_FLEX_shoot3.png").convert_alpha()
+playerFLEX_shoot_3 = pygame.transform.rotate(playerFLEX_shoot_3, 90)
+
+
 terror_logo = pygame.image.load("x/terror_crops_logo.png")
 terror_logo = pygame.transform.scale(terror_logo, (40, 40))
 
@@ -207,6 +220,9 @@ hordeAlert5 = pygame.mixer.Sound("sounds/hordeAlert5.wav")
 
 breakAlert = pygame.mixer.Sound("sounds/breakAlert.wav")
 
+FLEXShoot = pygame.mixer.Sound("sounds/FLEXshoot.wav")
+FLEXShoot.set_volume(10)
+
 hordeAlertList = [hordeAlert,hordeAlert2,hordeAlert3,hordeAlert4,hordeAlert5]
 
 music = pygame.mixer.Sound("sounds/placeholder.mp3")
@@ -236,6 +252,7 @@ ammoFrame2 = 0
 resupFlareFrame = 0
 resupFlareFrame2 = 0
 medPackAnimationFrame = 0
+lastFrameNotFired = 0
 
 eliteEnemyTime = 180
 enemySpawnTime = 10
@@ -275,6 +292,7 @@ playerSpriteList = []
 MK1ravagerList = [player_frame_1,player_shoot_1,player_shoot_2,player_shoot_3]
 MK2ravagerList = [playerMK2_1,playerMK2_shoot_1,playerMK2_shoot_2,playerMK2_shoot_3]
 SMGList = [playerSMG_1,playerSMG_shoot_1,playerSMG_shoot_2,playerSMG_shoot_3]
+FLEXList = [playerFLEX_1,playerFLEX_shoot_1,playerFLEX_shoot_2,playerFLEX_shoot_3]
 
 #enemy data
 enemy_speed = 1.4  # pixels per frame?
@@ -358,6 +376,8 @@ MK2ReloadList = [0,45,90]
 
 SMGReloadList = [0,20,40]
 
+FLEXReloadList = [0,25,45]
+
 ammo = magSize
 ammoSize = ammo
 
@@ -365,12 +385,12 @@ Gun_already_fired = False
 Is_reloading = False
 WeaponSwapFrame = True
 
-currentGun = "MK1ravager"
+currentGun = "flex"
 
 reloadList = [gun_Open, gun_Reload, gun_Close]
 WeaponList = []
 
-GA_frame = False # gun active
+gun_firing_frame = False # gun active
 CanShoot = False
 OutOfAmmo = False
 
@@ -420,9 +440,11 @@ def CheckWeapon(Weapon):
     if (Weapon == "MK1ravager"):
         return [5,105,35,6,MK1ravagerList,MK1ReloadList,gun_shoot,50] #damage, total ammo, mag size, fire rate, player sprites list, reload times, shoot sound, resup cost
     elif (Weapon == "MK2ravager"):
-        return [5,100,50,5,MK2ravagerList,MK2ReloadList,gun_shoot,115] #damage, total ammo, mag size, fire rate, player sprites list, reload times, shoot sound, resup cost
+        return [5,100,50,5,MK2ravagerList,MK2ReloadList,gun_shoot,100] #damage, total ammo, mag size, fire rate, player sprites list, reload times, shoot sound, resup cost
     elif (Weapon == "SMG"):
         return [1.5,0,425,1,SMGList,SMGReloadList,smgShoot,150] #damage, total ammo, mag size, fire rate, player sprites list, reload times, shoot sound, resup cost
+    elif (Weapon == "flex"):
+        return [7.5,125,25,10,FLEXList,FLEXReloadList,FLEXShoot,75] #damage, total ammo, mag size, fire rate, player sprites list, reload times, shoot sound, resup cost
     
 def enemyCol(enemy):
     if pygame.Rect.colliderect(enemy,playerRoatedRect):
@@ -568,6 +590,7 @@ while True:
 
         if (ammo <= 0) or (R_pressed == True):
             Is_reloading = True
+            OutOfAmmo = True
             if (Frame_checker == reloadTiming[0]):
                 pygame.mixer.Sound.play(gun_Open)
                 Frame_checker += 1
@@ -596,29 +619,25 @@ while True:
             else:
                 Frame_checker += 1
         
-        if (Total_Ammo <= 0 and ammo <= 0):
-            OutOfAmmo = True
-            if (current_frame % 60 == 0):
-                    pygame.mixer.Sound.play(gun_Close)
-        
-        if (Is_reloading == True) or (M_pressed == False) or (OutOfAmmo == True):
-            current_player_frame = playerSpriteList[0]
-        
         if (current_frame % Firerate) == 0 and (M_pressed) and (not Is_reloading) and (not OutOfAmmo):
-            GA_frame = True
-            if (current_frame % (Firerate * 2)) == 0:
+            gun_firing_frame = True
+            if (current_frame % Firerate) == 0:
                 ammo -= 1
                 if (ammo >= 1):
                     pygame.mixer.Sound.play(shootSound)
-        else:
-            GA_frame = False
+                gun_firing_frame = True
+                frames_after_firing = 5
 
-        if (GA_frame == True):
-            if (player_frame_offest == 1):
+        if gun_firing_frame:
+            if frames_after_firing > 0:
                 current_player_frame = playerSpriteList[random.randint(1,3)]
-                player_frame_offest = 0
+                frames_after_firing -= 1  # Decrease frame count after firing
             else:
-                player_frame_offest += 1
+                current_player_frame = playerSpriteList[0]
+                gun_firing_frame = False
+        else:
+            current_player_frame = playerSpriteList[0]
+            gun_firing_frame = False
 
         rotated_player_image = pygame.transform.rotate(current_player_frame, -Tangle_degrees)
         playerRoatedRect = rotated_player_image.get_rect(center=player_rect.center)
@@ -930,8 +949,7 @@ while True:
 
             distFromPlayer = math.hypot(bruteRotData[0], bruteRotData[1])
             distFromPlayer = (distFromPlayer / 25)
-            if (distFromPlayer <= 10):
-                print(distFromPlayer)
+            if (distFromPlayer <= 5):
                 bruteChargeTiming[x] += 1
                 bruteChargeSpeedList[x] = (1.2 * (bruteChargeTiming[x] / 25))
                 bruteChargingList[x] == True
@@ -986,8 +1004,6 @@ while True:
         current_frame += 1
         #display
         coin_display = str(coin)
-
-        #test
 
     if (mainMenu):
         screen.blit(background,(0,0))
