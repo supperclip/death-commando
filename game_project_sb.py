@@ -221,7 +221,10 @@ hordeAlert5 = pygame.mixer.Sound("sounds/hordeAlert5.wav")
 breakAlert = pygame.mixer.Sound("sounds/breakAlert.wav")
 
 FLEXShoot = pygame.mixer.Sound("sounds/FLEXshoot.wav")
-FLEXShoot.set_volume(10)
+FLEXShoot.set_volume(0.2)
+
+rifleShot = pygame.mixer.Sound("sounds/rifleShot.wav")
+rifleShot.set_volume(0.4)
 
 hordeAlertList = [hordeAlert,hordeAlert2,hordeAlert3,hordeAlert4,hordeAlert5]
 
@@ -237,6 +240,7 @@ Space_pressed = False
 E_pressed = False
 N_pressed = False
 P_pressed = False
+T_pressed = False
 pressed_1 = False
 pressed_3 = False
 ESC_pressed = False
@@ -438,13 +442,13 @@ def MoveEnemyY(rotX,rotY,currentY,speed):
 
 def CheckWeapon(Weapon):
     if (Weapon == "MK1ravager"):
-        return [5,100,35,6,MK1ravagerList,MK1ReloadList,gun_shoot,50] #damage, total ammo, mag size, fire rate, player sprites list, reload times, shoot sound, resup cost
+        return [5,100,35,6,MK1ravagerList,MK1ReloadList,rifleShot,50,1] #damage, total ammo, mag size, fire rate, player sprites list, reload times, shoot sound, resup cost, audio handling
     elif (Weapon == "MK2ravager"):
-        return [5,100,25,3,MK2ravagerList,MK2ReloadList,gun_shoot,50] #damage, total ammo, mag size, fire rate, player sprites list, reload times, shoot sound, resup cost
+        return [5,300,50,3,MK2ravagerList,MK2ReloadList,rifleShot,200,2] #damage, total ammo, mag size, fire rate, player sprites list, reload times, shoot sound, resup cost, audio handling
     elif (Weapon == "SMG"):
-        return [1.5,0,425,1,SMGList,SMGReloadList,smgShoot,150] #damage, total ammo, mag size, fire rate, player sprites list, reload times, shoot sound, resup cost
+        return [1.5,0,425,1,SMGList,SMGReloadList,smgShoot,150,1] #damage, total ammo, mag size, fire rate, player sprites list, reload times, shoot sound, resup cost, audio handling
     elif (Weapon == "flex"):
-        return [10,150,25,10,FLEXList,FLEXReloadList,FLEXShoot,75] #damage, total ammo, mag size, fire rate, player sprites list, reload times, shoot sound, resup cost
+        return [10,150,25,15,FLEXList,FLEXReloadList,FLEXShoot,75,1] #damage, total ammo, mag size, fire rate, player sprites list, reload times, shoot sound, resup cost, audio handling
     
 def enemyCol(enemy):
     if pygame.Rect.colliderect(enemy,playerRoatedRect):
@@ -500,6 +504,7 @@ while True:
             reloadTiming = WeaponList[5]
             shootSound = WeaponList[6]
             restockPrice = WeaponList[7]
+            gunAudio = WeaponList[8]
             ammo = magSize
             ammoSize = ammo
             WeaponSwapFrame = False
@@ -542,23 +547,32 @@ while True:
         
         if keys[pygame.K_r]:
             R_pressed = True
+        if not keys[pygame.K_r]:
+            R_pressed = False
         if keys[pygame.K_e]:
             E_pressed = True
+        if not keys[pygame.K_e]:
+            E_pressed = False
         if keys[pygame.K_n]:
             N_pressed = True
+        if not keys[pygame.K_n]:
+            N_pressed = False
         if keys[pygame.K_p]:
             P_pressed = True
-
+        if not keys[pygame.K_p]:
+            P_pressed = False
+        if keys[pygame.K_t]:
+            T_pressed = True
+        if not keys[pygame.K_t]:
+            T_pressed = False
         if keys[pygame.K_1]:
             pressed_1 = True
         if not keys[pygame.K_1]:
             pressed_1 = False
-
         if keys[pygame.K_3]:
             pressed_3 = True
         if not keys[pygame.K_3]:
             pressed_3 = False
-        
         if keys[pygame.K_SPACE]:
             Space_pressed = True
         if not keys[pygame.K_SPACE]:
@@ -623,15 +637,16 @@ while True:
             gun_firing_frame = True
             if (current_frame % Firerate) == 0:
                 ammo -= 1
-                if (ammo >= 1):
-                    pygame.mixer.Sound.play(shootSound)
+                if (current_frame % (Firerate * gunAudio) == 0):
+                    if (ammo >= 1):
+                        pygame.mixer.Sound.play(shootSound)
                 gun_firing_frame = True
                 frames_after_firing = 5
 
         if gun_firing_frame:
             if frames_after_firing > 0:
                 current_player_frame = playerSpriteList[random.randint(1,3)]
-                frames_after_firing -= 1  # Decrease frame count after firing
+                frames_after_firing -= 1
             else:
                 current_player_frame = playerSpriteList[0]
                 gun_firing_frame = False
@@ -746,8 +761,8 @@ while True:
                 medPackRestock = False
             
         if pygame.Rect.colliderect(planeRect,player_rect) and (E_pressed == True):
-            if (coin >= 50):
-                coin -= 50
+            if (coin >= 500):
+                coin -= 500
                 currentGun = "MK2ravager"
                 WeaponSwapFrame = True
                 E_pressed = False
@@ -756,14 +771,24 @@ while True:
                 E_pressed = False
 
         if pygame.Rect.colliderect(planeRect,player_rect) and (N_pressed):
-            if (coin >= 150):
-                coin -= 150
+            if (coin >= 750):
+                coin -= 750
                 currentGun = "SMG"
                 WeaponSwapFrame = True
                 N_pressed = False
                 Is_reloading = False
             else:
                 N_pressed = False
+
+        if pygame.Rect.colliderect(planeRect,player_rect) and (T_pressed):
+            if (coin >= 100):
+                coin -= 100
+                currentGun = "MK1ravager"
+                WeaponSwapFrame = True
+                N_pressed = False
+                Is_reloading = False
+            else:
+                T_pressed = False
 
         bursterIndex = []
 
@@ -803,6 +828,62 @@ while True:
             del bursterXList[index]
             del bursterYList[index]
             del bursterHealthList[index]
+
+        #rager logic
+        if (not waveStop):
+            if (current_frame % (eliteEnemyTime * 1) == 0):
+                ragerX = random.randint(0, 1000)
+                ragerXList.append(ragerX)
+                ragerYList.append(0)
+                ragerHealthList.append(ragerHealth)
+
+        ragerIndex = []
+
+        for x in range(len(ragerXList)):
+            ragerCoords = [ragerXList[x], ragerYList[x]]
+            ragerRotData = GetRotationAngle(placeHolderRect, ragerCoords)
+            ragerXList[x] = MoveEnemyX(ragerRotData[0], ragerRotData[1], ragerXList[x], ragerSpeed)
+            ragerYList[x] = MoveEnemyY(ragerRotData[0], ragerRotData[1], ragerYList[x], ragerSpeed)
+            ragerRoated = pygame.transform.rotate(ragerAnimationList[frame_offset], -ragerRotData[2])
+            ragerMask = pygame.mask.from_surface(ragerRoated)
+            ragerRect = ragerRoated.get_rect(center=(ragerXList[x], ragerYList[x]))
+            ragerPlaceholderRect = pygame.Rect.scale_by(ragerRect,2)
+
+
+            if ragerRect.clipline(line_start, line_end):
+                ragerClippedLine = True
+            else:
+                ragerClippedLine = False
+
+            if not OutOfAmmo:
+                if g1.FireGun(M_pressed, Firerate, current_frame, ragerClippedLine, Gun_already_fired, Is_reloading):
+                    ragerHealthList[x] -= damage
+
+            if ragerHealthList[x] <= 0:
+                ragerIndex.append(x)
+                coin += 10
+                pygame.mixer.Sound.play(ragerDeath)  
+
+            if playerMask.overlap(ragerMask,(ragerRect.x - playerRoatedRect.x,ragerRect.y - playerRoatedRect.y)):
+                ragerHitPlayer = True
+            
+            screen.blit(ragerRoated, ragerRect.topleft)  
+        
+        if (ragerHitPlayer):
+            if (ragerHitCooldown == 0):
+                playerHealth -=  ragerDamage
+                ragerHitTimer = True
+        if (ragerHitPlayer and ragerHitCooldown < ragerCooldown):
+            ragerHitCooldown += 1
+        if (ragerHitCooldown == ragerCooldown):
+            ragerHitTimer = False
+            ragerHitCooldown = 0
+            ragerHitPlayer = False
+
+        for index in sorted(ragerIndex, reverse=True): #idk how this works but ok
+            del ragerXList[index]
+            del ragerYList[index]
+            del ragerHealthList[index]  
         
         
         # Enemy logic
@@ -862,63 +943,6 @@ while True:
             del enemy_Ylist[index]
             del enemyHealthList[index]
         
-        
-        #rager logic
-        if (not waveStop):
-            if (current_frame % (eliteEnemyTime * 1) == 0):
-                ragerX = random.randint(0, 1000)
-                ragerXList.append(ragerX)
-                ragerYList.append(0)
-                ragerHealthList.append(ragerHealth)
-
-        ragerIndex = []
-
-        for x in range(len(ragerXList)):
-            ragerCoords = [ragerXList[x], ragerYList[x]]
-            ragerRotData = GetRotationAngle(placeHolderRect, ragerCoords)
-            ragerXList[x] = MoveEnemyX(ragerRotData[0], ragerRotData[1], ragerXList[x], ragerSpeed)
-            ragerYList[x] = MoveEnemyY(ragerRotData[0], ragerRotData[1], ragerYList[x], ragerSpeed)
-            ragerRoated = pygame.transform.rotate(ragerAnimationList[frame_offset], -ragerRotData[2])
-            ragerMask = pygame.mask.from_surface(ragerRoated)
-            ragerRect = ragerRoated.get_rect(center=(ragerXList[x], ragerYList[x]))
-            ragerPlaceholderRect = pygame.Rect.scale_by(ragerRect,2)
-
-
-            if ragerRect.clipline(line_start, line_end):
-                ragerClippedLine = True
-            else:
-                ragerClippedLine = False
-
-            if not OutOfAmmo:
-                if g1.FireGun(M_pressed, Firerate, current_frame, ragerClippedLine, Gun_already_fired, Is_reloading):
-                    ragerHealthList[x] -= damage
-
-            if ragerHealthList[x] <= 0:
-                ragerIndex.append(x)
-                coin += 10
-                pygame.mixer.Sound.play(ragerDeath)  
-
-            if playerMask.overlap(ragerMask,(ragerRect.x - playerRoatedRect.x,ragerRect.y - playerRoatedRect.y)):
-                ragerHitPlayer = True
-            
-            screen.blit(ragerRoated, ragerRect.topleft)  
-        
-        if (ragerHitPlayer):
-            if (ragerHitCooldown == 0):
-                playerHealth -=  ragerDamage
-                ragerHitTimer = True
-        if (ragerHitPlayer and ragerHitCooldown < ragerCooldown):
-            ragerHitCooldown += 1
-        if (ragerHitCooldown == ragerCooldown):
-            ragerHitTimer = False
-            ragerHitCooldown = 0
-            ragerHitPlayer = False
-
-        for index in sorted(ragerIndex, reverse=True): #idk how this works but ok
-            del ragerXList[index]
-            del ragerYList[index]
-            del ragerHealthList[index]
-
 
         #brute logic
         if (not waveStop):
