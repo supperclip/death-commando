@@ -438,13 +438,13 @@ def MoveEnemyY(rotX,rotY,currentY,speed):
 
 def CheckWeapon(Weapon):
     if (Weapon == "MK1ravager"):
-        return [5,105,35,6,MK1ravagerList,MK1ReloadList,gun_shoot,50] #damage, total ammo, mag size, fire rate, player sprites list, reload times, shoot sound, resup cost
+        return [5,100,35,6,MK1ravagerList,MK1ReloadList,gun_shoot,50] #damage, total ammo, mag size, fire rate, player sprites list, reload times, shoot sound, resup cost
     elif (Weapon == "MK2ravager"):
-        return [5,100,50,5,MK2ravagerList,MK2ReloadList,gun_shoot,100] #damage, total ammo, mag size, fire rate, player sprites list, reload times, shoot sound, resup cost
+        return [5,100,25,3,MK2ravagerList,MK2ReloadList,gun_shoot,50] #damage, total ammo, mag size, fire rate, player sprites list, reload times, shoot sound, resup cost
     elif (Weapon == "SMG"):
         return [1.5,0,425,1,SMGList,SMGReloadList,smgShoot,150] #damage, total ammo, mag size, fire rate, player sprites list, reload times, shoot sound, resup cost
     elif (Weapon == "flex"):
-        return [7.5,125,25,10,FLEXList,FLEXReloadList,FLEXShoot,75] #damage, total ammo, mag size, fire rate, player sprites list, reload times, shoot sound, resup cost
+        return [10,150,25,10,FLEXList,FLEXReloadList,FLEXShoot,75] #damage, total ammo, mag size, fire rate, player sprites list, reload times, shoot sound, resup cost
     
 def enemyCol(enemy):
     if pygame.Rect.colliderect(enemy,playerRoatedRect):
