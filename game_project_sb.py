@@ -235,7 +235,7 @@ hordeAlert5 = pygame.mixer.Sound("sounds/hordeAlert5.wav")
 breakAlert = pygame.mixer.Sound("sounds/breakAlert.wav")
 
 FLEXShoot = pygame.mixer.Sound("sounds/FLEXshoot.wav")
-FLEXShoot.set_volume(0.2)
+FLEXShoot.set_volume(2.5)
 
 rifleShot = pygame.mixer.Sound("sounds/rifleShot.wav")
 rifleShot.set_volume(0.4)
@@ -1098,7 +1098,6 @@ while True:
             enemy_Ylist = []
             enemyHealthList = []
             CanSpawnEnemy = True
-            Enemy_Clipped_line = False
             enemyHitPlayer = False
             bruteHitCooldown = 0
             bruteHitPlayer = False
@@ -1110,17 +1109,14 @@ while True:
             bruteChargeTiming = []
             bruteChargeRot = []
             bruteChargingList = []
-            bruteClippedLine = False
             ragerHitCooldown = 0
             ragerHitPlayer = False
             ragerHealthList = []
             ragerXList = []
             ragerYList = []
-            ragerClippedLine = False
             bursterHealthList = []
             bursterXList = []
             bursterYList = []
-            bursterClippedLine = False
             Gun_already_fired = False
             Is_reloading = False
             WeaponSwapFrame = True
