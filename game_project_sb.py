@@ -240,6 +240,15 @@ FLEXShoot.set_volume(2.5)
 rifleShot = pygame.mixer.Sound("sounds/rifleShot.wav")
 rifleShot.set_volume(0.4)
 
+metalReload1 = pygame.mixer.Sound("sounds/metalReload1.wav")
+metalReload1.set_volume(4.5)
+
+metalReload2 = pygame.mixer.Sound("sounds/metalReload2.wav")
+metalReload2.set_volume(4.5)
+
+metalReload3 = pygame.mixer.Sound("sounds/metalReload3.wav") #credit: marb7e
+metalReload3.set_volume(4.5)
+
 hordeAlertList = [hordeAlert,hordeAlert2,hordeAlert3,hordeAlert4,hordeAlert5]
 
 music = pygame.mixer.Sound("sounds/placeholder.mp3")
@@ -274,9 +283,11 @@ lastFrameNotFired = 0
 MenuFrame = 0
 menuFrame_offset = 0
 
-eliteEnemyTime = 180
-enemySpawnTime = 10
-maxEnemies = 100
+bruteSpawnTime = 400
+ragerSpawnTime = 220
+bursterSpawnTime = 280
+enemySpawnTime = 35
+maxEnemies = 40
 
 #shop data
 coin = 1
@@ -342,7 +353,7 @@ bruteSpeed = 0.5
 bruteHealth = 75
 bruteChargeSpeed = 1
 
-bruteDamage = 4
+bruteDamage = 10
 bruteHitCooldown = 0
 bruteCooldown = 180
 bruteHitPlayer = False
@@ -352,12 +363,9 @@ bruteAnimationList = [brute_1,brute_2]
 bruteHealthList = []
 bruteXList = []
 bruteYList = []
-bruteChargeSpeedList = []
-bruteChargeTiming = []
-bruteChargeRot = []
-bruteChargingList = []
 menuBrute_Xlist = []
 menuBrute_Ylist = []
+bruteSpeedList = []
 
 
 bruteClippedLine = False
@@ -406,6 +414,10 @@ MK2ReloadList = [0,45,90]
 SMGReloadList = [0,20,40]
 
 FLEXReloadList = [0,25,45]
+
+metalReloadList = [metalReload1,metalReload2,metalReload3]
+
+classicReloadList = [gun_Open,gun_Reload,gun_Close]
 
 ammo = magSize
 ammoSize = ammo
@@ -467,13 +479,13 @@ def MoveEnemyY(rotX,rotY,currentY,speed):
 
 def CheckWeapon(Weapon):
     if (Weapon == "MK1ravager"):
-        return [5,150,25,6,MK1ravagerList,MK1ReloadList,rifleShot,50,1] #damage, total ammo, mag size, fire rate, player sprites list, reload times, shoot sound, resup cost, audio handling
+        return [5,150,25,6,MK1ravagerList,MK1ReloadList,rifleShot,50,1,classicReloadList] #damage, total ammo, mag size, fire rate, player sprites list, reload times, shoot sound, resup cost, audio handling, reload sounds
     elif (Weapon == "MK2ravager"):
-        return [5,300,50,3,MK2ravagerList,MK2ReloadList,rifleShot,200,2] #damage, total ammo, mag size, fire rate, player sprites list, reload times, shoot sound, resup cost, audio handling
+        return [5,300,50,3,MK2ravagerList,MK2ReloadList,rifleShot,200,2,classicReloadList] #damage, total ammo, mag size, fire rate, player sprites list, reload times, shoot sound, resup cost, audio handling, reload sounds
     elif (Weapon == "SMG"):
-        return [1.5,0,425,1,SMGList,SMGReloadList,smgShoot,150,1] #damage, total ammo, mag size, fire rate, player sprites list, reload times, shoot sound, resup cost, audio handling
+        return [1.5,0,425,1,SMGList,SMGReloadList,smgShoot,150,1,classicReloadList] #damage, total ammo, mag size, fire rate, player sprites list, reload times, shoot sound, resup cost, audio handling, reload sounds
     elif (Weapon == "flex"):
-        return [5,150,25,15,FLEXList,FLEXReloadList,FLEXShoot,75,1] #damage, total ammo, mag size, fire rate, player sprites list, reload times, shoot sound, resup cost, audio handling
+        return [5,150,25,15,FLEXList,FLEXReloadList,FLEXShoot,75,1,metalReloadList] #damage, total ammo, mag size, fire rate, player sprites list, reload times, shoot sound, resup cost, audio handling, reload sounds
     
 def enemyCol(enemy):
     if pygame.Rect.colliderect(enemy,playerRoatedRect):
@@ -506,9 +518,6 @@ while True:
         #enemy spawn scalling
         if (current_frame == (60 * 60) * 0.05):
             pygame.mixer.Sound.play(hordeAlertList[random.randint(1,4)])
-            eliteEnemyTime = 260
-            enemySpawnTime = 20
-            maxEnemies = 40
             waveStop = False
         if (current_frame == (60 * 60) * 0.5):
             waveStop = True
@@ -516,9 +525,11 @@ while True:
         if (current_frame == (60*60) * 0.8):
             waveStop = False
             pygame.mixer.Sound.play(hordeAlertList[random.randint(1,4)])
-            eliteEnemyTime = 240
-            enemySpawnTime = 15
-            maxEnemies = 65
+            bruteSpawnTime = 400
+            ragerSpawnTime = 180
+            bursterSpawnTime = 260
+            enemySpawnTime = 30
+            maxEnemies = 60
         
         if (WeaponSwapFrame == True):
             WeaponList = CheckWeapon(currentGun)
@@ -533,6 +544,7 @@ while True:
             shootSound = WeaponList[6]
             restockPrice = WeaponList[7]
             gunAudio = WeaponList[8]
+            reloadSounds = WeaponList[9]
             ammo = magSize
             ammoSize = ammo
             WeaponSwapFrame = False
@@ -632,13 +644,13 @@ while True:
             Is_reloading = True
             OutOfAmmo = True
             if (Frame_checker == reloadTiming[0]):
-                pygame.mixer.Sound.play(gun_Open)
+                pygame.mixer.Sound.play(reloadSounds[0])
                 Frame_checker += 1
             elif (Frame_checker == reloadTiming[1]):
-                pygame.mixer.Sound.play(gun_Reload)
+                pygame.mixer.Sound.play(reloadSounds[1])
                 Frame_checker += 1
             elif (Frame_checker == reloadTiming[2]):
-                pygame.mixer.Sound.play(gun_Close)
+                pygame.mixer.Sound.play(reloadSounds[2])
                 Frame_checker = 0
                 Is_reloading = False
                 if (Total_Ammo > magSize):
@@ -819,7 +831,7 @@ while True:
 
         #burster logic
         if (not waveStop):
-            if (current_frame % 400 == 0):
+            if (current_frame % bursterSpawnTime == 0):
                 burster_x = random.randint(0, 1000)
                 bursterXList.append(burster_x)
                 bursterYList.append(0)
@@ -856,7 +868,7 @@ while True:
 
         #rager logic
         if (not waveStop):
-            if (current_frame % (eliteEnemyTime * 1) == 0):
+            if (current_frame % ragerSpawnTime == 0):
                 ragerX = random.randint(0, 1000)
                 ragerXList.append(ragerX)
                 ragerYList.append(0)
@@ -971,41 +983,30 @@ while True:
 
         #brute logic
         if (not waveStop):
-            if (current_frame % (eliteEnemyTime * 1.25) == 0):
+            if (current_frame % bruteSpawnTime == 0):
                 brute_x = random.randint(0, 1000)
                 bruteXList.append(brute_x)
                 bruteYList.append(0)
                 bruteHealthList.append(bruteHealth)
-                bruteChargeSpeedList.append(bruteChargeSpeed)
-                bruteChargeTiming.append(0)
-                bruteChargeRot.append(0)
-                bruteChargingList.append(False)
+                bruteSpeedList.append(1)
 
         bruteIndex = []
 
         for x in range(len(bruteXList)):
-            resultSpeed = (bruteSpeed * bruteChargeSpeedList[x])
-            
+            resultSpeed = (bruteSpeed * bruteSpeedList[x])
             bruteCoords = [bruteXList[x], bruteYList[x]]
             bruteRotData = GetRotationAngle(placeHolderRect, bruteCoords)
-            if (bruteChargingList[x] == False):
-                bruteChargeRot[x] = bruteRotData[2]
             bruteXList[x] = MoveEnemyX(bruteRotData[0], bruteRotData[1], bruteXList[x], resultSpeed)
             bruteYList[x] = MoveEnemyY(bruteRotData[0], bruteRotData[1], bruteYList[x], resultSpeed)
-            bruteRoated = pygame.transform.rotate(bruteAnimationList[frame_offset], -bruteChargeRot[x])
+            bruteRoated = pygame.transform.rotate(bruteAnimationList[frame_offset], -bruteRotData[2])
             bruteMask = pygame.mask.from_surface(bruteRoated)
             bruteRect = bruteRoated.get_rect(center=(bruteXList[x], bruteYList[x]))
-
             distFromPlayer = math.hypot(bruteRotData[0], bruteRotData[1])
             distFromPlayer = (distFromPlayer / 25)
-            if (distFromPlayer <= 5):
-                bruteChargeTiming[x] += 1
-                bruteChargeSpeedList[x] = (1.11 * (bruteChargeTiming[x] / 25))
-                bruteChargingList[x] == True
-            else:
-                bruteChargeSpeedList[x] = 1
-                bruteChargingList[x] = False
-                bruteChargeSpeedList[x] = 1
+            if (distFromPlayer <= 6):
+                bruteSpeedList[x] = 2.5
+            if (distFromPlayer > 6):
+                bruteSpeedList[x] = 1
 
             if bruteRect.clipline(line_start, line_end):
                 bruteClippedLine = True
@@ -1027,7 +1028,7 @@ while True:
             screen.blit(bruteRoated, bruteRect.topleft)
         
         if (bruteHitPlayer):
-            if (bruteHitCooldown == 0):
+            if (bruteHitCooldown == 0):  
                 playerHealth -=  bruteDamage
                 bruteHitTimer = True
         if (bruteHitTimer and bruteHitCooldown < bruteCooldown):
@@ -1041,9 +1042,16 @@ while True:
             del bruteXList[index]
             del bruteYList[index]
             del bruteHealthList[index]
-            del bruteChargeSpeedList[index]
-            del bruteChargeTiming[index]
-            del bruteChargeRot[index]
+            del bruteSpeedList[index]
+
+        #reset bools
+        Gun_already_fired = False
+        OutOfAmmo = False
+
+        #increment frame
+        current_frame += 1
+        #display
+        coin_display = str(coin)
         
         if (playerHealth <= 0):
             R_pressed = False
@@ -1126,15 +1134,6 @@ while True:
             CanShoot = False
             OutOfAmmo = False
             currentEnemyWave = 1
-        
-        #reset bools
-        Gun_already_fired = False
-        OutOfAmmo = False
-
-        #increment frame
-        current_frame += 1
-        #display
-        coin_display = str(coin)
 
     if (mainMenu):
         screen.blit(background,(0,0))
