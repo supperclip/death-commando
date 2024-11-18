@@ -857,9 +857,15 @@ while True:
                         gunDrop = True
                         blitWeaponDropUI = False
                 if (currentShopGun == 1):
-                    if (coin >= 250):
-                        coin -= 250
-                        gunSupply = "MK1ravager"
+                    if (coin >= 500):
+                        coin -= 500
+                        gunSupply = "MK2ravager"
+                        gunDrop = True
+                        blitWeaponDropUI = False
+                if (currentShopGun == 2):
+                    if (coin >= 750):
+                        coin -= 750
+                        gunSupply = "SMG"
                         gunDrop = True
                         blitWeaponDropUI = False
                 gunRect = gun1.get_rect()
@@ -906,36 +912,6 @@ while True:
                 if (playerHealth > 50):
                     playerHealth = 50
                 medPackRestock = False
-            
-        if pygame.Rect.colliderect(planeRect,player_rect) and (E_pressed == True):
-            if (coin >= 500):
-                coin -= 500
-                currentGun = "MK2ravager"
-                WeaponSwapFrame = True
-                E_pressed = False
-                Is_reloading = False
-            else:
-                E_pressed = False
-
-        if pygame.Rect.colliderect(planeRect,player_rect) and (N_pressed):
-            if (coin >= 750):
-                coin -= 750
-                currentGun = "SMG"
-                WeaponSwapFrame = True
-                N_pressed = False
-                Is_reloading = False
-            else:
-                N_pressed = False
-
-        if pygame.Rect.colliderect(planeRect,player_rect) and (T_pressed):
-            if (coin >= 100):
-                coin -= 100
-                currentGun = "MK1ravager"
-                WeaponSwapFrame = True
-                N_pressed = False
-                Is_reloading = False
-            else:
-                T_pressed = False
 
         if current_frame % 10 == 0:
                 frame_offset = random.randint(0, 1)
