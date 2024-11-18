@@ -176,7 +176,13 @@ medPack3 = pygame.transform.scale(medPack3, (150, 100))
 medPackAnimationList = [medPack1,medPack2,medPack3,medPack2,medPack1]
 
 callInUI = pygame.image.load("x/callInUI.png") #scale: 112 by 79
-callInUI = pygame.transform.scale(callInUI, (350, 175))
+callInUI = pygame.transform.scale(callInUI, (350, 275))
+
+MK1ui = pygame.image.load("x/MK1UI.png")
+MK1ui = pygame.transform.scale(MK1ui, (350, 275))
+
+MK2ui = pygame.image.load("x/MK2UI.png")
+MK2ui = pygame.transform.scale(MK2ui, (350, 275))
 
 gameLogo = pygame.image.load("x/mainMenu.png")
 
@@ -265,8 +271,11 @@ N_pressed = False
 P_pressed = False
 T_pressed = False
 pressed_1 = False
+pressed_2 = False
 pressed_3 = False
 ESC_pressed = False
+
+callWeaponDropUI = False
 
 #frame data
 current_frame = 0
@@ -479,13 +488,13 @@ def MoveEnemyY(rotX,rotY,currentY,speed):
 
 def CheckWeapon(Weapon):
     if (Weapon == "MK1ravager"):
-        return [5,150,25,6,MK1ravagerList,MK1ReloadList,rifleShot,50,1,classicReloadList] #damage, total ammo, mag size, fire rate, player sprites list, reload times, shoot sound, resup cost, audio handling, reload sounds
+        return [5,100,25,6,MK1ravagerList,MK1ReloadList,rifleShot,100,1,classicReloadList] #damage, total ammo, mag size, fire rate, player sprites list, reload times, shoot sound, resup cost, audio handling, reload sounds
     elif (Weapon == "MK2ravager"):
         return [5,300,50,3,MK2ravagerList,MK2ReloadList,rifleShot,200,2,classicReloadList] #damage, total ammo, mag size, fire rate, player sprites list, reload times, shoot sound, resup cost, audio handling, reload sounds
     elif (Weapon == "SMG"):
         return [1.5,0,425,1,SMGList,SMGReloadList,smgShoot,150,1,classicReloadList] #damage, total ammo, mag size, fire rate, player sprites list, reload times, shoot sound, resup cost, audio handling, reload sounds
     elif (Weapon == "flex"):
-        return [5,150,25,15,FLEXList,FLEXReloadList,FLEXShoot,75,1,metalReloadList] #damage, total ammo, mag size, fire rate, player sprites list, reload times, shoot sound, resup cost, audio handling, reload sounds
+        return [7.5,150,25,15,FLEXList,FLEXReloadList,FLEXShoot,50,1,metalReloadList] #damage, total ammo, mag size, fire rate, player sprites list, reload times, shoot sound, resup cost, audio handling, reload sounds
     
 def enemyCol(enemy):
     if pygame.Rect.colliderect(enemy,playerRoatedRect):
@@ -506,7 +515,6 @@ def Delay(inputFrame,frame,delay):
         return True
     else:
         return False
-
 
 while True:
 
@@ -607,10 +615,12 @@ while True:
             pressed_1 = True
         if not keys[pygame.K_1]:
             pressed_1 = False
+        if keys[pygame.K_2]:
+            pressed_2 = True
+        if not keys[pygame.K_2]:
+            pressed_2 = False
         if keys[pygame.K_3]:
             pressed_3 = True
-        if not keys[pygame.K_3]:
-            pressed_3 = False
         if keys[pygame.K_SPACE]:
             Space_pressed = True
         if not keys[pygame.K_SPACE]:
@@ -728,7 +738,7 @@ while True:
         screen.blit(terror_logo, (0, 0))
         screen.blit(bulletUI, (800, 600))
         screen.blit(white_line, (902.5,647.5))
-        screen.blit(callInUI,(-51,542))
+        screen.blit(callInUI,(-16,486))
 
         #text
         gradient_text(screen, playerHealthDis, HL_font, (255, 0, 0), (0, 0, 0), (500, 500))
@@ -767,7 +777,7 @@ while True:
                 Total_Ammo = maxAmmo
                 ammoRestock = False
 
-        if (pressed_3) and (coin >= medPackPrice) and (not medPackRestock):
+        if (pressed_2) and (coin >= medPackPrice) and (not medPackRestock):
             medPackRect = medPack1.get_rect()
             medPackRect.x = playerRoatedRect.x + (random.randint(-100,100))
             if (medPackRect.x) >= 1000 or medPackRect.x < 0:
@@ -776,9 +786,21 @@ while True:
             if (medPackRect.y) >= 7000 or medPackRect.y < 0:
                 medPackRect.y = playerRoatedRect.y
             coin -= medPackPrice
-            pressed_3 = False
+            pressed_2 = False
             medPackCallFrame = current_frame
             medPackCalledIn = True
+
+        if (pressed_3):
+            if not (callWeaponDropUI):
+                callWeaponDropUI = True
+                pressed_3 = False
+
+        if (callWeaponDropUI):
+            screen.blit(MK1ui,(90,382))
+            if (pressed_3):
+                callWeaponDropUI = False
+                pressed_3 = False
+
 
         if (medPackCalledIn):
             resupFlareFrame2 = 0 + Animation(current_frame,3,resupFlareFrame2,25)
