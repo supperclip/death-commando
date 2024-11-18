@@ -184,6 +184,9 @@ MK1ui = pygame.transform.scale(MK1ui, (350, 275))
 MK2ui = pygame.image.load("x/MK2UI.png")
 MK2ui = pygame.transform.scale(MK2ui, (350, 275))
 
+smgUI = pygame.image.load("x/smgUI.png")
+smgUI = pygame.transform.scale(smgUI, (350, 275))
+
 gameLogo = pygame.image.load("x/mainMenu.png")
 
 playButton1 = pygame.image.load("x/playButton1.png")
@@ -198,6 +201,18 @@ playButtonMask = pygame.mask.from_surface(playButton1)
 playButtonState = playButton1
 
 playButton2 = pygame.image.load("x/playButton2.png")
+
+gun1 = pygame.image.load("x/gun1.png")
+gun1 = pygame.transform.scale(gun1, (125, 125))
+gunMask = pygame.mask.from_surface(gun1)
+
+gun2 = pygame.image.load("x/gun2.png")
+gun2 = pygame.transform.scale(gun2, (125, 125))
+
+gun3 = pygame.image.load("x/gun3.png")
+gun3 = pygame.transform.scale(gun3, (125, 125))
+
+gunAnimationList = [gun1,gun2,gun3,gun2,gun1]
 
 crosshair = pygame.image.load("x/crosshair.png")
 crosshair = pygame.transform.scale(crosshair, (50, 50))
@@ -274,8 +289,12 @@ pressed_1 = False
 pressed_2 = False
 pressed_3 = False
 ESC_pressed = False
+rightArrowPressed = False
+rightMousePressed = False
+middleMousePressed = False
 
 callWeaponDropUI = False
+blitWeaponDropUI = False
 
 #frame data
 current_frame = 0
@@ -287,7 +306,9 @@ ammoFrame = 0
 ammoFrame2 = 0
 resupFlareFrame = 0
 resupFlareFrame2 = 0
+resupFlareFrame3 = 0
 medPackAnimationFrame = 0
+gunAnimationFrame = 0
 lastFrameNotFired = 0
 MenuFrame = 0
 menuFrame_offset = 0
@@ -305,6 +326,7 @@ resupCallFrame = 0
 resupCalledIn = False
 
 medPackCallFrame = 0
+gunDropCallFrame = 0
 medPackCalledIn = False
 medPackPrice = 10
 medPackRestock = False
@@ -316,6 +338,13 @@ resupBlit = False
 
 ammoShopBuy = False
 ammoRestock = False
+gunDrop = False
+gunSupply = "buh"
+gunCalledIn = False
+
+currentShopGun = 0
+
+gunShopList = [MK1ui,MK2ui,smgUI]
 
 #player data
 player_rect.x = 400
@@ -520,6 +549,8 @@ while True:
 
     if (playing):
         
+        was_pressed_3 = False
+
         if (current_frame == 0):
             pygame.mixer.Sound.play(music,-1)
             waveStop = True
@@ -573,6 +604,19 @@ while True:
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit()
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_3:
+                    pressed_3 = True   
+                if event.key == pygame.K_RIGHT:
+                    rightArrowPressed = True
+            
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 3:
+                    rightMousePressed = True
+                if event.button == 2:
+                    middleMousePressed = True
+
         keys = pygame.key.get_pressed()
         if keys[pygame.K_a] and keys[pygame.K_w]:
             Current_Direction = Directions.UpAndLeft
@@ -619,13 +663,11 @@ while True:
             pressed_2 = True
         if not keys[pygame.K_2]:
             pressed_2 = False
-        if keys[pygame.K_3]:
-            pressed_3 = True
         if keys[pygame.K_SPACE]:
             Space_pressed = True
         if not keys[pygame.K_SPACE]:
             Space_pressed = False
-        
+
         mouse_buttons = pygame.mouse.get_pressed()
         M_pressed = mouse_buttons[0]  # Left mouse button
         
@@ -791,17 +833,63 @@ while True:
             medPackCalledIn = True
 
         if (pressed_3):
-            if not (callWeaponDropUI):
-                callWeaponDropUI = True
+            if not (blitWeaponDropUI):   
+                blitWeaponDropUI = True
                 pressed_3 = False
+        if (pressed_3):
+            if (blitWeaponDropUI):   
+                    blitWeaponDropUI = False
+                    pressed_3 = False
+                
+        if blitWeaponDropUI:
+            if (rightMousePressed):
+                currentShopGun += 1
+                rightMousePressed = False
+                if (currentShopGun > (len(gunShopList) - 1)):
+                    currentShopGun = 0
+            screen.blit(gunShopList[currentShopGun], (90, 382))
 
-        if (callWeaponDropUI):
-            screen.blit(MK1ui,(90,382))
-            if (pressed_3):
-                callWeaponDropUI = False
-                pressed_3 = False
+            if (middleMousePressed):
+                if (currentShopGun == 0):
+                    if (coin >= 150):
+                        coin -= 150  
+                        gunSupply = "MK1ravager"
+                        gunDrop = True
+                        blitWeaponDropUI = False
+                if (currentShopGun == 1):
+                    if (coin >= 250):
+                        coin -= 250
+                        gunSupply = "MK1ravager"
+                        gunDrop = True
+                        blitWeaponDropUI = False
+                gunRect = gun1.get_rect()
+                gunRect.x = playerRoatedRect.x + (random.randint(-100,100))
+                if (gunRect.x) >= 1000 or gunRect.x < 0:
+                    gunRect.x = playerRoatedRect.x
+                gunRect.y = playerRoatedRect.y + (random.randint(-50,50))
+                if (gunRect.y) >= 7000 or gunRect.y < 0:
+                    gunRect.y = playerRoatedRect.y
+                gunDropCallFrame = current_frame
+                middleMousePressed = False
+                    
+        if (gunDrop):
+            resupFlareFrame3 = 0 + Animation(current_frame,3,resupFlareFrame3,25)
+            screen.blit(dropAnimationList[resupFlareFrame3],gunRect)
 
+            if Delay(current_frame,gunDropCallFrame,60):
+                gunCalledIn = True
+                gunDrop = False
 
+        if (gunCalledIn):
+            gunAnimationFrame = 0 + Animation(current_frame,4,gunAnimationFrame,15)
+            screen.blit(gunAnimationList[gunAnimationFrame],gunRect)
+            if playerMask.overlap(gunMask,(gunRect.x - playerRoatedRect.x,gunRect.y - playerRoatedRect.y)):
+                currentGun = gunSupply
+                WeaponSwapFrame = True
+                E_pressed = False
+                Is_reloading = False
+                gunCalledIn = False
+                
         if (medPackCalledIn):
             resupFlareFrame2 = 0 + Animation(current_frame,3,resupFlareFrame2,25)
             screen.blit(dropAnimationList[resupFlareFrame2],medPackRect)
@@ -848,6 +936,9 @@ while True:
                 Is_reloading = False
             else:
                 T_pressed = False
+
+        if current_frame % 10 == 0:
+                frame_offset = random.randint(0, 1)
 
         bursterIndex = []
 
@@ -960,8 +1051,6 @@ while True:
             enemyRotData = GetRotationAngle(placeHolderRect, enemy_coords)
             enemy_Xlist[x] = MoveEnemyX(enemyRotData[0], enemyRotData[1], enemy_Xlist[x],enemy_speed) 
             enemy_Ylist[x] = MoveEnemyY(enemyRotData[0], enemyRotData[1], enemy_Ylist[x],enemy_speed)
-            if current_frame % 10 == 0:
-                frame_offset = random.randint(0, 1)
             rotated_enemy = pygame.transform.rotate(chainsaw_animation_list[frame_offset], -enemyRotData[2])
             rotated_rect = rotated_enemy.get_rect(center=(enemy_Xlist[x],enemy_Ylist[x]))
             enemyMask = pygame.mask.from_surface(rotated_enemy)
@@ -1156,8 +1245,13 @@ while True:
             CanShoot = False
             OutOfAmmo = False
             currentEnemyWave = 1
+            blitWeaponDropUI = False
+            currentShopGun = 0
+            p1 = player(Current_Direction,Space_pressed,current_frame,dashCooldown)
+            g1 = GunLogic(M_pressed,Firerate,current_frame,Enemy_Clipped_line,Gun_already_fired,Is_reloading)
 
     if (mainMenu):
+        
         screen.blit(background,(0,0))
         for event in pygame.event.get():
             if event.type == QUIT:
